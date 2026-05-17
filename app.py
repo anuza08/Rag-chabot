@@ -20,7 +20,7 @@ from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_anthropic import ChatAnthropic
+from langchain_groq import ChatGroq
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 
@@ -43,14 +43,14 @@ st.caption(
 with st.sidebar:
     st.header("⚙️ Configuration")
     api_key = st.text_input(
-        "Anthropic API Key",
+        "Groq API Key",
         type="password",
-        value=os.getenv("ANTHROPIC_API_KEY", ""),
-        help="Used only for the final generation step. Embeddings run locally.",
+        value=os.getenv("GROQ_API_KEY", ""),
+        help="Free key from console.groq.com. Used only for generation; embeddings run locally.",
     )
     model_name = st.selectbox(
         "LLM model",
-        ["claude-sonnet-4-6", "claude-opus-4-7", "claude-haiku-4-5-20251001"],
+        ["llama-3.1-8b-instant", "llama-3.3-70b-versatile", "gemma2-9b-it", "mixtral-8x7b-32768"],
         index=0,
     )
     chunk_size = st.slider("Chunk size (characters)", 200, 2000, 1000, 100)
@@ -117,7 +117,7 @@ def build_vectorstore(uploaded_files, chunk_size, chunk_overlap):
 
 def make_qa_chain(vectorstore, api_key, model_name, top_k):
     """Build a RetrievalQA chain with a clear, source-aware prompt."""
-    llm = ChatAnthropic(
+    llm = ChatGroq(
         model=model_name,
         api_key=api_key,
         temperature=0,
@@ -205,7 +205,7 @@ for msg in st.session_state.messages:
 prompt = st.chat_input("Ask anything about your documents...")
 if prompt:
     if not api_key:
-        st.error("Please add your Anthropic API key in the sidebar.")
+        st.error("Please add your Groq API key in the sidebar.")
         st.stop()
 
     st.session_state.messages.append({"role": "user", "content": prompt})
